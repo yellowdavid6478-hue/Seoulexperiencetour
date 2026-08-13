@@ -1,0 +1,610 @@
+import React, { useState, useEffect, useRef } from "react";
+
+/* ---------------------------------------------------------
+   SEOUL EXPERIENCE TOUR — landing page
+   Palette: Kimchi Red #C93838 / Night Indigo #1A2038 /
+            Warm Ivory #FAF6EF / Seongsu Concrete #8B8378 /
+            Gold #D4A94A
+--------------------------------------------------------- */
+
+const PROGRAMS = [
+  {
+    id: "kimchi",
+    tag: "PROGRAM 01",
+    color: "#C93838",
+    colorSoft: "#FBEAE8",
+    title: "김치 체험 투어",
+    subtitle: "한끼를 맛보다, 김치로 하나되는 시간",
+    desc: "김치의 역사와 문화를 배우고, 직접 담근 김치를 포장해 가는 손끝의 여행.",
+    bullets: [
+      "김치의 역사와 문화 소개",
+      "김치 만들기 체험 (개인접시)",
+      "한복 체험 및 포토타임",
+      "한식 시식 (갓김치, 잡채 등)",
+      "완성한 김치 포장 및 기념품 제공",
+    ],
+    meta: [
+      { label: "소요시간", value: "2–3시간" },
+      { label: "운영장소", value: "종로 · 인사동 인근" },
+      { label: "대상", value: "외국인 관광객 · 가족" },
+    ],
+    glyph: "kimchi",
+  },
+  {
+    id: "mbti",
+    tag: "PROGRAM 02",
+    color: "#3B4C8C",
+    colorSoft: "#EAEDF7",
+    title: "MBTI 서울 투어",
+    subtitle: "나에게 맞는 서울을 여행하다",
+    desc: "간단한 MBTI 검사로 16가지 유형을 분석하고, 유형별 맞춤 코스로 서울을 걷는다.",
+    bullets: [
+      "간단한 MBTI 검사 후 16개 유형 분석",
+      "유형별 맞춤 코스 추천",
+      "미션 수행 및 인증 스탬프 투어",
+      "기념품 & 인증서 제공",
+    ],
+    meta: [
+      { label: "소요시간", value: "4–6시간" },
+      { label: "운영형태", value: "가이드 투어 · 자유투어" },
+      { label: "대상", value: "MZ세대 · 친구 · 연인" },
+    ],
+    glyph: "compass",
+  },
+  {
+    id: "seongsu",
+    tag: "PROGRAM 03",
+    color: "#8B6A3F",
+    colorSoft: "#F3ECDF",
+    title: "성수동 브랜드 투어",
+    subtitle: "브랜드의 발생을 걷다, 성수 감성 투어",
+    desc: "팝업스토어와 로컬 브랜드 매장을 도장깨듯 순회하는 감성 카페 투어.",
+    bullets: [
+      "성수동 브랜드 스트리트 소개",
+      "팝업스토어 & 플래그십 스토어 탐방",
+      "로컬 브랜드 매장 방문",
+      "감성 카페 & 디저트 체험",
+      "포토스팟 투어 & 굿즈 구매",
+    ],
+    meta: [
+      { label: "소요시간", value: "4–5시간" },
+      { label: "운영장소", value: "성수동 일대" },
+      { label: "대상", value: "MZ세대 · 브랜드 관심층" },
+    ],
+    glyph: "storefront",
+  },
+];
+
+const TIMELINE = [
+  { step: "1", label: "프로그램 개발", period: "2025.6 – 8월", detail: "콘텐츠 기획 · 코스 개발 · 파트너 발굴" },
+  { step: "2", label: "시범 운영", period: "2025.9 – 10월", detail: "파일럿 투어 운영 · 피드백 수집" },
+  { step: "3", label: "관광상품 출시", period: "2025.11 – 12월", detail: "정식 프로그램 오픈 · 온라인 예약 구성" },
+  { step: "4", label: "해외 홍보", period: "2026.1 – 3월", detail: "글로벌 플랫폼 연계 · 인플루언서 협업" },
+  { step: "5", label: "성과 평가 및 고도화", period: "2026.4월 ~", detail: "성과 분석 · 만족도 조사 · 프로그램 고도화" },
+];
+
+const KPI = [
+  { label: "연간 참가자 수", value: "5,000", unit: "명" },
+  { label: "외국인 참가 비율", value: "60", unit: "%" },
+  { label: "고객 만족도", value: "95", unit: "% 이상" },
+  { label: "재방문 의향", value: "80", unit: "% 이상" },
+];
+
+function Glyph({ type, color }) {
+  const s = { stroke: color, strokeWidth: 1.6, fill: "none", strokeLinecap: "round", strokeLinejoin: "round" };
+  if (type === "kimchi")
+    return (
+      <svg viewBox="0 0 48 48" width="34" height="34">
+        <path d="M14 20c0-8 4-13 10-13s10 5 10 13" style={s} />
+        <ellipse cx="24" cy="30" rx="15" ry="9" style={s} />
+        <path d="M11 30c0 6 6 10 13 10s13-4 13-10" style={s} />
+      </svg>
+    );
+  if (type === "compass")
+    return (
+      <svg viewBox="0 0 48 48" width="34" height="34">
+        <circle cx="24" cy="24" r="15" style={s} />
+        <path d="M29 19l-6 10-8 5 6-10 8-5z" style={s} />
+      </svg>
+    );
+  return (
+    <svg viewBox="0 0 48 48" width="34" height="34">
+      <path d="M9 20l15-11 15 11" style={s} />
+      <path d="M11 20v16h26V20" style={s} />
+      <path d="M20 36V26h8v10" style={s} />
+    </svg>
+  );
+}
+
+function SkylineSVG({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 1440 360" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1A2038" />
+          <stop offset="55%" stopColor="#2A2F52" />
+          <stop offset="100%" stopColor="#C93838" stopOpacity="0.25" />
+        </linearGradient>
+      </defs>
+      <rect width="1440" height="360" fill="url(#skyGrad)" />
+      <path d="M0 260 Q220 210 420 250 T900 240 T1440 255 V360 H0 Z" fill="#141a30" opacity="0.7" />
+      {[
+        [20, 210, 60], [95, 180, 45], [150, 230, 70], [235, 160, 55], [300, 200, 90],
+        [405, 150, 50], [470, 190, 65], [550, 130, 60], [625, 205, 80], [720, 170, 45],
+        [780, 220, 95], [890, 160, 55], [960, 195, 70], [1040, 140, 50], [1105, 210, 85],
+        [1205, 175, 60], [1270, 225, 100], [1385, 165, 55],
+      ].map(([x, h, w], i) => (
+        <rect key={i} x={x} y={360 - h} width={w} height={h} fill="#20264a" opacity={0.85} />
+      ))}
+      {Array.from({ length: 90 }).map((_, i) => {
+        const x = 20 + ((i * 47) % 1400);
+        const y = 130 + ((i * 71) % 200);
+        return <rect key={i} x={x} y={y} width="4" height="6" fill="#D4A94A" opacity={0.15 + (i % 5) * 0.12} />;
+      })}
+      <g transform="translate(700,40)">
+        <line x1="0" y1="60" x2="0" y2="270" stroke="#C93838" strokeWidth="3" />
+        <path d="M-22 270 L0 60 L22 270 Z" fill="none" stroke="#C93838" strokeWidth="2" opacity="0.7" />
+        <circle cx="0" cy="50" r="9" fill="#D4A94A" />
+        <line x1="-14" y1="150" x2="14" y2="150" stroke="#C93838" strokeWidth="2" />
+        <line x1="-10" y1="200" x2="10" y2="200" stroke="#C93838" strokeWidth="2" />
+      </g>
+    </svg>
+  );
+}
+
+function Reveal({ children, className = "", delay = 0 }) {
+  const ref = useRef(null);
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShow(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: show ? 1 : 0,
+        transform: show ? "translateY(0)" : "translateY(24px)",
+        transition: `opacity 0.7s ease ${delay}ms, transform 0.7s cubic-bezier(.22,.9,.32,1) ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export default function App() {
+  const [activeProgram, setActiveProgram] = useState(0);
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({ name: "", contact: "", program: PROGRAMS[0].title, people: "1" });
+  const prog = PROGRAMS[activeProgram];
+
+  useEffect(() => {
+    document.body.style.margin = "0";
+    document.body.style.background = "#FAF6EF";
+  }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
+  return (
+    <div style={{ fontFamily: "'Pretendard','Noto Sans KR',sans-serif", color: "#1A2038", background: "#FAF6EF", overflowX: "hidden" }}>
+      <style>{`
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        .sxt-btn { cursor:pointer; border:none; font-family:inherit; }
+        .sxt-btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+          outline: 3px solid #D4A94A; outline-offset: 2px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+        .nav-link { position:relative; }
+        .nav-link::after {
+          content:""; position:absolute; left:0; bottom:-4px; width:0%; height:2px; background:#C93838;
+          transition:width .3s ease;
+        }
+        .nav-link:hover::after { width:100%; }
+        .card-hover { transition: transform .35s cubic-bezier(.22,.9,.32,1), box-shadow .35s ease; }
+        .card-hover:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(26,32,56,0.12); }
+        .tab-btn { transition: all .3s ease; }
+        input, select { font-family: inherit; }
+      `}</style>
+
+      <nav style={{
+        position: "sticky", top: 0, zIndex: 50, background: "rgba(250,246,239,0.92)",
+        backdropFilter: "blur(8px)", borderBottom: "1px solid rgba(26,32,56,0.08)",
+      }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 8, background: "linear-gradient(135deg,#C93838,#D4A94A)" }} />
+            <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: 0.5 }}>SEOUL EXPERIENCE TOUR</span>
+          </div>
+          <div style={{ display: "flex", gap: 28, fontSize: 14, fontWeight: 600, color: "#4A4F6B" }} className="desktop-nav">
+            <a href="#programs" className="nav-link" style={{ textDecoration: "none", color: "inherit" }}>프로그램</a>
+            <a href="#timeline" className="nav-link" style={{ textDecoration: "none", color: "inherit" }}>추진일정</a>
+            <a href="#kpi" className="nav-link" style={{ textDecoration: "none", color: "inherit" }}>성과지표</a>
+          </div>
+          <button className="sxt-btn" onClick={() => setApplyOpen(true)} style={{
+            background: "#C93838", color: "#fff", padding: "10px 20px", borderRadius: 999, fontWeight: 700, fontSize: 13.5,
+          }}>
+            신청하기
+          </button>
+        </div>
+      </nav>
+
+      <header style={{ position: "relative", overflow: "hidden" }}>
+        <SkylineSVG className="hero-skyline" />
+        <style>{`.hero-skyline{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}`}</style>
+        <div style={{
+          position: "relative", zIndex: 1, maxWidth: 1180, margin: "0 auto",
+          padding: "120px 24px 100px", color: "#FAF6EF", textAlign: "center",
+        }}>
+          <Reveal>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(212,169,74,0.16)",
+              border: "1px solid rgba(212,169,74,0.4)", borderRadius: 999, padding: "6px 16px", fontSize: 13,
+              fontWeight: 700, letterSpacing: 1, marginBottom: 24, color: "#F4D488",
+            }}>
+              서울특별시 · 서울 체험형 관광 콘텐츠 개발 사업
+            </div>
+          </Reveal>
+          <Reveal delay={100}>
+            <h1 style={{ fontSize: "clamp(36px,6vw,64px)", fontWeight: 900, lineHeight: 1.15, margin: "0 0 18px", letterSpacing: -1 }}>
+              서울을 보고, 만들고,<br />경험하다
+            </h1>
+          </Reveal>
+          <Reveal delay={200}>
+            <p style={{ fontSize: "clamp(15px,2vw,18px)", color: "#D8DAEA", maxWidth: 560, margin: "0 auto 40px", lineHeight: 1.7 }}>
+              K-푸드, K-컬처, K-브랜드를 직접 체험하는 서울만의 특별한 여행.
+              오감으로 몸에 담는 서울 어행을 재안합니다.
+            </p>
+          </Reveal>
+          <Reveal delay={300}>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <button className="sxt-btn" onClick={() => setApplyOpen(true)} style={{
+                background: "#C93838", color: "#fff", padding: "15px 32px", borderRadius: 999,
+                fontWeight: 800, fontSize: 15, boxShadow: "0 12px 30px rgba(201,56,56,0.4)",
+              }}>
+                투어 신청하기 →
+              </button>
+              <a href="#programs" style={{
+                display: "inline-flex", alignItems: "center", color: "#FAF6EF", padding: "15px 28px",
+                borderRadius: 999, fontWeight: 700, fontSize: 15, border: "1.5px solid rgba(250,246,239,0.4)",
+                textDecoration: "none",
+              }}>
+                프로그램 둘러보기
+              </a>
+            </div>
+          </Reveal>
+        </div>
+
+        <div style={{ position: "relative", zIndex: 1, background: "#FAF6EF" }}>
+          <div style={{
+            maxWidth: 1180, margin: "0 auto", padding: "28px 24px", display: "grid",
+            gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 20,
+          }}>
+            {[
+              ["체험 중심 관광", "보는 관광에서 벗어나 직접 만들고 경험하는 여행"],
+              ["맞춤형 투어", "MBTI 기반 맞춤 코스로 나에게 맞는 서울 여행"],
+              ["SNS 인증 여행", "인증 미션과 포토존으로 추억을 공유하는 여행"],
+              ["지역 상권 활성화", "성수동 등 로컬 브랜드와 지역 경제 동반 성장"],
+            ].map(([t, d], i) => (
+              <Reveal key={t} delay={i * 80}>
+                <div style={{ padding: "14px 6px" }}>
+                  <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 6, color: "#1A2038" }}>{t}</div>
+                  <div style={{ fontSize: 13, color: "#7A7F9A", lineHeight: 1.55 }}>{d}</div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      <section id="programs" style={{ padding: "90px 24px 60px", background: "#FAF6EF" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+          <Reveal>
+            <div style={{ textAlign: "center", marginBottom: 46 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#C93838", letterSpacing: 2, marginBottom: 10 }}>PROGRAM</div>
+              <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 900, margin: 0 }}>세 가지 방식으로 서울을 걷다</h2>
+            </div>
+          </Reveal>
+
+          <Reveal delay={100}>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 40, flexWrap: "wrap" }}>
+              {PROGRAMS.map((p, i) => (
+                <button
+                  key={p.id}
+                  className="tab-btn sxt-btn"
+                  onClick={() => setActiveProgram(i)}
+                  style={{
+                    padding: "12px 22px", borderRadius: 999, fontWeight: 700, fontSize: 14,
+                    background: activeProgram === i ? p.color : "#fff",
+                    color: activeProgram === i ? "#fff" : "#4A4F6B",
+                    border: `1.5px solid ${activeProgram === i ? p.color : "rgba(26,32,56,0.12)"}`,
+                  }}
+                >
+                  {p.tag} · {p.title}
+                </button>
+              ))}
+            </div>
+          </Reveal>
+
+          <div
+            key={PROGRAMS[activeProgram].id}
+            className="card-hover"
+            style={{
+              background: "#fff", borderRadius: 28, overflow: "hidden",
+              border: `1px solid ${PROGRAMS[activeProgram].colorSoft}`, boxShadow: "0 10px 30px rgba(26,32,56,0.06)",
+              animation: "fadeIn 0.5s ease",
+            }}
+          >
+            <style>{`@keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }`}</style>
+            <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", minHeight: 0 }} className="program-grid">
+              <style>{`
+                @media (max-width: 760px) { .program-grid { grid-template-columns: 1fr !important; } }
+              `}</style>
+
+              <div style={{ padding: "48px 44px" }}>
+                <div style={{
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  width: 56, height: 56, borderRadius: 16, background: PROGRAMS[activeProgram].colorSoft, marginBottom: 20,
+                }}>
+                  <Glyph type={PROGRAMS[activeProgram].glyph} color={PROGRAMS[activeProgram].color} />
+                </div>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: PROGRAMS[activeProgram].color, letterSpacing: 1.5, marginBottom: 8 }}>
+                  {PROGRAMS[activeProgram].tag}
+                </div>
+                <h3 style={{ fontSize: 28, fontWeight: 900, margin: "0 0 8px" }}>{PROGRAMS[activeProgram].title}</h3>
+                <p style={{ fontSize: 15, fontWeight: 600, color: "#7A7F9A", margin: "0 0 18px" }}>{PROGRAMS[activeProgram].subtitle}</p>
+                <p style={{ fontSize: 14.5, lineHeight: 1.75, color: "#4A4F6B", margin: "0 0 24px" }}>{PROGRAMS[activeProgram].desc}</p>
+
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "grid", gap: 10 }}>
+                  {PROGRAMS[activeProgram].bullets.map((b) => (
+                    <li key={b} style={{ display: "flex", gap: 10, fontSize: 14, color: "#2A2F52" }}>
+                      <span style={{ color: PROGRAMS[activeProgram].color, fontWeight: 900 }}>·</span>
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+
+                <div style={{ display: "flex", gap: 22, flexWrap: "wrap", borderTop: "1px solid #EFEBE0", paddingTop: 20 }}>
+                  {PROGRAMS[activeProgram].meta.map((m) => (
+                    <div key={m.label}>
+                      <div style={{ fontSize: 11.5, color: "#A6A9BE", fontWeight: 700, marginBottom: 4 }}>{m.label}</div>
+                      <div style={{ fontSize: 13.5, fontWeight: 700, color: "#1A2038" }}>{m.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  className="sxt-btn"
+                  onClick={() => { setForm((f) => ({ ...f, program: PROGRAMS[activeProgram].title })); setApplyOpen(true); }}
+                  style={{
+                    marginTop: 28, background: PROGRAMS[activeProgram].color, color: "#fff", padding: "13px 26px",
+                    borderRadius: 999, fontWeight: 800, fontSize: 14,
+                  }}
+                >
+                  {PROGRAMS[activeProgram].title} 신청하기
+                </button>
+              </div>
+
+              <div style={{
+                background: `linear-gradient(160deg, ${PROGRAMS[activeProgram].colorSoft}, #fff)`,
+                display: "flex", alignItems: "center", justifyContent: "center", padding: 44, position: "relative",
+              }}>
+                <div style={{
+                  width: "100%", aspectRatio: "1/1", maxWidth: 300, borderRadius: 24,
+                  background: `linear-gradient(135deg, ${PROGRAMS[activeProgram].color}22, ${PROGRAMS[activeProgram].color}05)`,
+                  border: `1.5px dashed ${PROGRAMS[activeProgram].color}55`,
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14,
+                }}>
+                  <div style={{
+                    width: 88, height: 88, borderRadius: "50%", background: "#fff",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: `0 10px 24px ${PROGRAMS[activeProgram].color}33`,
+                  }}>
+                    <Glyph type={PROGRAMS[activeProgram].glyph} color={PROGRAMS[activeProgram].color} />
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: PROGRAMS[activeProgram].color, textAlign: "center" }}>
+                    {PROGRAMS[activeProgram].subtitle}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="timeline" style={{ padding: "90px 24px", background: "#1A2038", color: "#FAF6EF" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+          <Reveal>
+            <div style={{ textAlign: "center", marginBottom: 56 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#D4A94A", letterSpacing: 2, marginBottom: 10 }}>TIMELINE</div>
+              <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 900, margin: 0 }}>추진 일정</h2>
+            </div>
+          </Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 4, position: "relative" }}>
+            {TIMELINE.map((t, i) => (
+              <Reveal key={t.step} delay={i * 90}>
+                <div style={{ padding: "0 14px", position: "relative" }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: "50%", border: "2px solid #D4A94A",
+                    display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800,
+                    fontSize: 15, color: "#D4A94A", marginBottom: 16,
+                  }}>
+                    {t.step}
+                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 6 }}>{t.label}</div>
+                  <div style={{ fontSize: 12.5, color: "#D4A94A", fontWeight: 700, marginBottom: 10 }}>{t.period}</div>
+                  <div style={{ fontSize: 12.5, color: "#AEB2CC", lineHeight: 1.6 }}>{t.detail}</div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="kpi" style={{ padding: "90px 24px", background: "#FAF6EF" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+          <Reveal>
+            <div style={{ textAlign: "center", marginBottom: 50 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#C93838", letterSpacing: 2, marginBottom: 10 }}>KPI</div>
+              <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 900, margin: 0 }}>성과 지표</h2>
+            </div>
+          </Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 20 }}>
+            {KPI.map((k, i) => (
+              <Reveal key={k.label} delay={i * 90}>
+                <div className="card-hover" style={{
+                  background: "#fff", borderRadius: 20, padding: "34px 24px", textAlign: "center",
+                  border: "1px solid rgba(26,32,56,0.06)",
+                }}>
+                  <div style={{ fontSize: 40, fontWeight: 900, color: "#C93838", lineHeight: 1 }}>
+                    {k.value}<span style={{ fontSize: 18, marginLeft: 3 }}>{k.unit}</span>
+                  </div>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, color: "#7A7F9A", marginTop: 12 }}>{k.label}</div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "100px 24px", background: "linear-gradient(135deg,#C93838,#8B2E2E)", color: "#fff", textAlign: "center" }}>
+        <Reveal>
+          <h2 style={{ fontSize: "clamp(28px,4.5vw,42px)", fontWeight: 900, margin: "0 0 16px" }}>
+            서울에서 특별한 추억을 만들어보세요
+          </h2>
+          <p style={{ fontSize: 15, color: "#F5D9D9", marginBottom: 36 }}>
+            지금 신청하고 나만의 서울 체험을 시작하세요.
+          </p>
+          <button className="sxt-btn" onClick={() => setApplyOpen(true)} style={{
+            background: "#fff", color: "#C93838", padding: "16px 40px", borderRadius: 999,
+            fontWeight: 900, fontSize: 16, boxShadow: "0 14px 30px rgba(0,0,0,0.2)",
+          }}>
+            투어 신청하기 →
+          </button>
+        </Reveal>
+      </section>
+
+      <footer style={{ padding: "36px 24px", background: "#14182B", color: "#7A7F9A", textAlign: "center", fontSize: 12.5 }}>
+        SEOUL MY SOUL · 서울 체험형 관광 콘텐츠 개발 사업 &nbsp;|&nbsp; 서울특별시
+      </footer>
+
+      {applyOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => { if (e.target === e.currentTarget) { setApplyOpen(false); setSubmitted(false); } }}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(20,24,43,0.55)", zIndex: 100,
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+          }}
+        >
+          <div style={{
+            background: "#fff", borderRadius: 24, maxWidth: 440, width: "100%", padding: "36px 32px",
+            position: "relative", animation: "fadeIn 0.3s ease",
+          }}>
+            <button
+              className="sxt-btn"
+              onClick={() => { setApplyOpen(false); setSubmitted(false); }}
+              aria-label="닫기"
+              style={{ position: "absolute", top: 18, right: 18, background: "none", fontSize: 20, color: "#A6A9BE" }}
+            >
+              ✕
+            </button>
+
+            {!submitted ? (
+              <>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: "#C93838", letterSpacing: 1, marginBottom: 6 }}>APPLY</div>
+                <h3 style={{ fontSize: 22, fontWeight: 900, margin: "0 0 24px" }}>투어 신청하기</h3>
+                <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
+                  <label style={{ display: "grid", gap: 6, fontSize: 13, fontWeight: 700, color: "#4A4F6B" }}>
+                    이름
+                    <input
+                      required
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      placeholder="홍길동"
+                      style={{ padding: "12px 14px", borderRadius: 12, border: "1.5px solid #E6E2D5", fontSize: 14 }}
+                    />
+                  </label>
+                  <label style={{ display: "grid", gap: 6, fontSize: 13, fontWeight: 700, color: "#4A4F6B" }}>
+                    연락처 / 이메일
+                    <input
+                      required
+                      value={form.contact}
+                      onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                      placeholder="010-0000-0000"
+                      style={{ padding: "12px 14px", borderRadius: 12, border: "1.5px solid #E6E2D5", fontSize: 14 }}
+                    />
+                  </label>
+                  <label style={{ display: "grid", gap: 6, fontSize: 13, fontWeight: 700, color: "#4A4F6B" }}>
+                    희망 프로그램
+                    <select
+                      value={form.program}
+                      onChange={(e) => setForm({ ...form, program: e.target.value })}
+                      style={{ padding: "12px 14px", borderRadius: 12, border: "1.5px solid #E6E2D5", fontSize: 14, background: "#fff" }}
+                    >
+                      {PROGRAMS.map((p) => (
+                        <option key={p.id} value={p.title}>{p.title}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label style={{ display: "grid", gap: 6, fontSize: 13, fontWeight: 700, color: "#4A4F6B" }}>
+                    인원
+                    <select
+                      value={form.people}
+                      onChange={(e) => setForm({ ...form, people: e.target.value })}
+                      style={{ padding: "12px 14px", borderRadius: 12, border: "1.5px solid #E6E2D5", fontSize: 14, background: "#fff" }}
+                    >
+                      {["1", "2", "3", "4", "5명 이상"].map((n) => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <button type="submit" className="sxt-btn" style={{
+                    marginTop: 8, background: "#C93838", color: "#fff", padding: "14px", borderRadius: 12,
+                    fontWeight: 800, fontSize: 15,
+                  }}>
+                    신청 완료하기
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div style={{ textAlign: "center", padding: "20px 0" }}>
+                <div style={{
+                  width: 64, height: 64, borderRadius: "50%", background: "#FBEAE8", margin: "0 auto 20px",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, color: "#C93838",
+                }}>
+                  ✓
+                </div>
+                <h3 style={{ fontSize: 19, fontWeight: 900, margin: "0 0 10px" }}>신청이 접수되었습니다</h3>
+                <p style={{ fontSize: 13.5, color: "#7A7F9A", lineHeight: 1.6 }}>
+                  {form.name}님, {form.program} 신청이 완료되었어요.<br />
+                  담당자가 입력하신 연락처로 안내드릴게요.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
